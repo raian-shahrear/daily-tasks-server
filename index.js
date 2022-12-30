@@ -19,11 +19,11 @@ async function run(){
   try{
     // MDB collections
     const tasksCollection = client.db("daily-tasks").collection("tasks");
+    const descriptionsCollection = client.db("daily-tasks").collection("descriptions");
 
     // post/create tasks collection
     app.post("/tasks", async(req, res)=> {
       const task = req.body;
-      console.log(task)
       const result = await tasksCollection.insertOne(task);
       res.send(result);
     })
@@ -35,6 +35,16 @@ async function run(){
         userEmail: email
       }
       const result = await tasksCollection.find(query).sort({addingTime: -1}).toArray();
+      res.send(result);
+    })
+    // get task for task completion
+    app.get("/task-completed", async(req, res)=> {
+      const email = req.query.email;
+      const query = {
+        userEmail: email,
+        isCompleted: true
+      };
+      const result = await tasksCollection.find(query).toArray();
       res.send(result);
     })
 
@@ -60,7 +70,35 @@ async function run(){
       const result = await tasksCollection.deleteOne(filter);
       res.send(result);
     })
+
+    // post/create descriptions collection
+    app.post("/descriptions", async(req, res)=> {
+      const description = req.body;
+      const result = await descriptionsCollection.insertOne(description);
+      res.send(result);
+    })
+
+    // get descriptions by email
+    app.get("/descriptions", async(req, res)=> {
+      const email = req.query.email;
+      const id = req.query.id;
+      const query = {
+        userEmail: email,
+        taskId: id
+      };
+      const result = await descriptionsCollection.find(query).sort({postingTime: -1}).toArray();
+      res.send(result);
+    })
+
+    //delete description
+    app.delete("/descriptions/:id", async(req, res)=> {
+      const id = req.params.id;
+      const filter = {_id: ObjectId(id)};
+      const result = await descriptionsCollection.deleteOne(filter);
+      res.send(result);
+    })
   }
+
   finally{}
 }
 run().catch(err => console.log(err.message))
