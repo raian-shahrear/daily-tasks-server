@@ -66,9 +66,12 @@ async function run(){
     //delete task
     app.delete("/tasks/:id", async(req, res)=> {
       const id = req.params.id;
-      const filter = {_id: ObjectId(id)};
-      const result = await tasksCollection.deleteOne(filter);
+      const filter1 = {_id: ObjectId(id)};
+      const result = await tasksCollection.deleteOne(filter1);
       res.send(result);
+      // delete description
+      const filter2 = {taskId: id};
+      const descriptionDelete = await descriptionsCollection.deleteMany(filter2);
     })
 
     // post/create descriptions collection
